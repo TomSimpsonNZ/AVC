@@ -3,4 +3,4 @@ Victoria University of Wellington Autonomous Vehicle Challenge
 
 Contributors:
 
-Bryony, Aiden, Trent, Jakob and Tom
+Bryony, Aidan, Trent, Jakob and Tom
