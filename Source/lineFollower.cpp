@@ -99,7 +99,7 @@ int main() {
 		//make error a value between 0 and 255
 			//divide the error by the maximum possible error (figure this shit out later)
 			//multiply this by 255
-		error1 = (error1/MAx_ERROR) * 255;
+		error1 = (error1/MAX_ERROR) * 255;
 		
 		//get the differential
 			//set diff_e to error1-error0
