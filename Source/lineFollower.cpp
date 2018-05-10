@@ -19,8 +19,8 @@ int main() {
 	int vL, vR;
 	int pixRow[320];
 	int nwp = 0;
-	float Kp = 0.005; //How aggresively the robot responds to the line not being in the center of the camera
-	float Kd = 0.005;
+	float Kp = 0.005f; //How aggresively the robot responds to the line not being in the center of the camera
+	float Kd = 0.005f;
 	
 	int diff_e, diff_t;
 	float diff;
@@ -36,6 +36,7 @@ int main() {
 		error1 = 0;
 		//take a picture
 		take_picture();		
+		
 		//make an array of all the pixels in a row of the image
 		//go through all the values in the array
 			//check if the current value is greater than the maximum
@@ -43,7 +44,7 @@ int main() {
 			//check if the current value is smaller than the minimum
 				//if true set minumum to the current value
 		for (int i = 0; i < width; i++) {
-			pixRow[i] = get_pixel(i, 120, 3);
+			pixRow[i] = get_pixel(120, i + 1, 3);
 			if (pixRow[i] > max){
 				max = pixRow[i];
 			}
@@ -53,7 +54,7 @@ int main() {
 		}
 				
 		//set the threshold to equal half the difference between the max and the minumum
-		threshold = (unsigned char)((max - min)/2 + min);
+		threshold = (unsigned char)((max + min)/2.0F);			//check if this is the same
 		
 		//go through the array again
 			//check if the current value is greater than the threshhold
@@ -76,9 +77,9 @@ int main() {
 		//the end is a solid white line perpendicular to the line that the robot was following, so now check to see
 		//if the number of white pixels is larger than a certain value
 			//if true, break;
-		if (nwp > width/2) {
-			break;
-		}
+		/*if (nwp > width/2) {
+			break;						//comment this out
+		}*/
 		
 		//set the error value
 		//decare int j = 319;
@@ -108,7 +109,8 @@ int main() {
 		//set error0 = error1
 		diff_e = error1 - error0;
 		diff_t = ((float)(clock() - t0)/ CLOCKS_PER_SEC);
-		diff = diff_e/diff_t;
+		printf("float conversion complete\n"); //insert this
+		diff = (float)diff_e/(float)diff_t;
 		t0 = clock();
 		error0 = error1;
 		
@@ -119,7 +121,8 @@ int main() {
 			// set_motor(1, vL)
 			// set_motor(2, vR)
 		
-		dv = error1 * Kp + diff * Kd;
+		dv = (int)(error1 * Kp + diff * Kd); //change this
+		printf("int conversion complete\n"); //insert this
 		vL = vGo + dv;
 		vR = vGo - dv;
 		
