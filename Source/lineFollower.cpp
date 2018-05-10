@@ -15,7 +15,7 @@ int main() {
 	int error0 = 0;
 	int error1 = 0;
 	int threshold;
-	unsigned char vGo = 125; //set this to the speed that you want the robot to travel at by default
+	int vGo = 125; //set this to the speed that you want the robot to travel at by default
 	int dv; //difference in speed between the two motors
 	int vL, vR;
 	int pixRow[320];
@@ -26,8 +26,8 @@ int main() {
 	int diff_e, diff_t;
 	float diff;
 	
-	unsigned char max = 0;
-	unsigned char min = 255;
+	int max = 0;				//make these ints
+	int min = 255;
 	
 	clock_t t0 = clock(); // set this right before the loop starts so that there is actually a start time
 	
@@ -47,7 +47,7 @@ int main() {
 			//check if the current value is smaller than the minimum
 				//if true set minumum to the current value
 		for (int i = 0; i < width; i++) {
-			pixRow[i] = get_pixel(120, i + 1, 3);
+			pixRow[i] = (int)get_pixel(120, i + 1, 3);		//change this
 			if (pixRow[i] > max){
 				max = pixRow[i];
 			}
@@ -60,7 +60,7 @@ int main() {
 		threshold = (int)((max + min)/2.0F);	//I think this works, worth checking more thoroughly 	
 		
 		//go through the array again
-			//check if the current value is greater than the threshhold
+			//check if the current value is greater than the threshold
 				//if true set the value to 1 and add 1 to nwp
 				//else set it to 0
 			//multiply the value by the amount of values it is away from the center
@@ -79,9 +79,9 @@ int main() {
 		//the end is a solid white line perpendicular to the line that the robot was following, so now check to see
 		//if the number of white pixels is larger than a certain value
 			//if true, break;
-		/*if (nwp > width/2) {
-			break;						//comment this out
-		}*/
+		if (nwp > width/2) {
+			break;				
+		}
 		
 		//set the error value
 		//decare int j = 319;
@@ -101,7 +101,7 @@ int main() {
 		//make error a value between 0 and 255
 			//divide the error by the maximum possible error (figure this shit out later)
 			//multiply this by 255
-		error1 = (error1/MAX_ERROR) * 255;
+		error1 = (error1* 255)/MAX_ERROR;													//THIS IS WHY IT'S  ZERO
 		
 		//get the differential
 			//set diff_e to error1-error0
@@ -111,7 +111,6 @@ int main() {
 		//set error0 = error1
 		diff_e = error1 - error0;
 		diff_t = ((float)(clock() - t0)/ CLOCKS_PER_SEC);
-		printf("float conversion complete\n"); //insert this
 		diff = (float)diff_e/(float)diff_t;
 		t0 = clock();
 		error0 = error1;
@@ -124,12 +123,11 @@ int main() {
 			// set_motor(2, vR)
 		
 		dv = (int)(error1 * Kp + diff * Kd); //change this
-		printf("int conversion complete\n"); //insert this
 		vL = vGo + dv;
 		vR = vGo - dv;
 		
-		set_motor(1, vL);
-		set_motor(2, vR);
+		set_motor(1, -vL);
+		set_motor(2, -vR);
 	}
 	
 	set_motor(1,0);
