@@ -6,6 +6,7 @@
 
 const int width = 320;
 const int MAX_ERROR = 12800;
+const int dev = true;
 
 int main() {
 	
@@ -13,9 +14,9 @@ int main() {
 	
 	int error0 = 0;
 	int error1 = 0;
-	unsigned char threshold;
+	int threshold;
 	unsigned char vGo = 125; //set this to the speed that you want the robot to travel at by default
-	unsigned char dv; //difference in speed between the two motors
+	int dv; //difference in speed between the two motors
 	int vL, vR;
 	int pixRow[320];
 	int nwp = 0;
@@ -34,6 +35,8 @@ int main() {
 	while(true) {
 		//set error1 to 0
 		error1 = 0;
+		nwp = 0;							//add this
+		
 		//take a picture
 		take_picture();		
 		
@@ -54,13 +57,12 @@ int main() {
 		}
 				
 		//set the threshold to equal half the difference between the max and the minumum
-		threshold = (unsigned char)((max + min)/2.0F);			//check if this is the same
+		threshold = (int)((max + min)/2.0F);	//I think this works, worth checking more thoroughly 	
 		
 		//go through the array again
 			//check if the current value is greater than the threshhold
 				//if true set the value to 1 and add 1 to nwp
 				//else set it to 0
-				
 			//multiply the value by the amount of values it is away from the center
 			//(could do this by multiplying the value by (i-numPixelsInARow/2) where i=0 will give -160 and i=320 will give 160
 		
@@ -88,7 +90,7 @@ int main() {
 			//add that value to error1
 			//decrease j by 1
 		int j = width - 1;
-		for (int i = 0; i < width; i++) {
+		for (int i = 0; i < width/2; i++) {
 			error1 += pixRow[i] + pixRow[j];
 			j--;
 		}
