@@ -8,6 +8,40 @@ const int width = 320;
 const int MAX_ERROR = 12800;
 const int dev = true;
 
+void findLine(int array[width], int min, int max) {
+	
+	bool foundLine = false;
+	
+	while (!foundLine){
+		
+		take_picture();
+		
+		for (int i = 0; i < width; i++) {
+			array[i] = (int)get_pixel(120, i + 1, 3);
+			if (array[i] > max){
+				max = array[i];
+			}
+			else if (array[i] < min) {
+				min = array[i];
+			}
+		}
+		
+		if (max > 150) {
+			foundLine = true;
+			set_motor(1, 0);
+			set_motor(2, 0);
+		}
+		else {
+			set_motor(1, -50);
+			set_motor(2, -50);
+		}
+		
+		/*if(fucked){
+			unfuck();
+		}*/
+	}
+}
+
 int main() {
 	
 	init();
@@ -15,13 +49,13 @@ int main() {
 	int error0 = 0;
 	int error1 = 0;
 	int threshold;
-	int vGo = 125; //set this to the speed that you want the robot to travel at by default
+	int vGo = 50; //set this to the speed that you want the robot to travel at by default
 	int dv; //difference in speed between the two motors
 	int vL, vR;
 	int pixRow[320];
 	int nwp = 0;
-	float Kp = 0.005f; //How aggresively the robot responds to the line not being in the center of the camera
-	float Kd = 0.005f;
+	float Kp = 0.2f; //How aggresively the robot responds to the line not being in the center of the camera
+	float Kd = 0.2f;
 	
 	int diff_e, diff_t;
 	float diff;
@@ -35,7 +69,9 @@ int main() {
 	while(true) {
 		//set error1 to 0
 		error1 = 0;
-		nwp = 0;							//add this
+		nwp = 0;	
+		max = 0;
+		min = 255;						//add this
 		
 		//take a picture
 		take_picture();		
@@ -54,6 +90,10 @@ int main() {
 			else if (pixRow[i] < min) {
 				min = pixRow[i];
 			}
+		}
+		
+		if (max < 150) {
+			// find the line again
 		}
 				
 		//set the threshold to equal half the difference between the max and the minumum
@@ -74,13 +114,6 @@ int main() {
 			else {
 				pixRow[i] = 0;
 			}
-		}
-		
-		//the end is a solid white line perpendicular to the line that the robot was following, so now check to see
-		//if the number of white pixels is larger than a certain value
-			//if true, break;
-		if (nwp > width/2) {
-			break;				
 		}
 		
 		//set the error value
