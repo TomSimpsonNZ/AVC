@@ -6,11 +6,15 @@
 
 const int width = 320;
 const int MAX_ERROR = 12800;
-const int dev = true;
+const bool dev = false;
 
 void findLine(int array[width], int min, int max) {
 	
 	bool foundLine = false;
+	
+	/*if(fucked){
+		unfuck();
+	}*/
 	
 	while (!foundLine){
 		
@@ -32,19 +36,18 @@ void findLine(int array[width], int min, int max) {
 			set_motor(2, 0);
 		}
 		else {
-			set_motor(1, -50);
-			set_motor(2, -50);
+			set_motor(1, 50);
+			set_motor(2, 50);
 		}
-		
-		/*if(fucked){
-			unfuck();
-		}*/
 	}
 }
 
 int main() {
 	
 	init();
+
+	FILE* file;
+	file = fopen("log.txt", "w");
 	
 	int error0 = 0;
 	int error1 = 0;
@@ -54,13 +57,15 @@ int main() {
 	int vL, vR;
 	int pixRow[320];
 	int nwp = 0;
-	float Kp = 0.2f; //How aggresively the robot responds to the line not being in the center of the camera
-	float Kd = 0.2f;
+	//change these to adjust
+	float Kp = 0.5f; //How aggresively the robot responds to the line not being in the center of the camera
+	float Kd = 0.0f;
 	
-	int diff_e, diff_t;
+	int diff_e;
+	float diff_t;
 	float diff;
 	
-	int max = 0;				//make these ints
+	int max = 0;
 	int min = 255;
 	
 	clock_t t0 = clock(); // set this right before the loop starts so that there is actually a start time
@@ -69,21 +74,15 @@ int main() {
 	while(true) {
 		//set error1 to 0
 		error1 = 0;
-		nwp = 0;	
+		nwp = 0;
 		max = 0;
-		min = 255;						//add this
-		
+		min = 255;
 		//take a picture
-		take_picture();		
-		
-		//make an array of all the pixels in a row of the image
-		//go through all the values in the array
-			//check if the current value is greater than the maximum
-				// if true set the maximum to this value
-			//check if the current value is smaller than the minimum
-				//if true set minumum to the current value
+		take_picture();
+				
+		//make an array of all the pixels in a row of the image and set max and min
 		for (int i = 0; i < width; i++) {
-			pixRow[i] = (int)get_pixel(120, i + 1, 3);		//change this
+			pixRow[i] = (int)get_pixel(120, i+1, 3);
 			if (pixRow[i] > max){
 				max = pixRow[i];
 			}
@@ -92,23 +91,20 @@ int main() {
 			}
 		}
 		
-		if (max < 150) {
-			// find the line again
+		if (max < 100) {
+			findLine(pixRow, min, max);
 		}
 				
 		//set the threshold to equal half the difference between the max and the minumum
-		threshold = (int)((max + min)/2.0F);	//I think this works, worth checking more thoroughly 	
+		threshold = (max+min)/2;
+		if (dev) {
+			fprintf(file, "max = %d\nmin = %d\nthreshold = %d\n", max, min, threshold);
+		}
 		
-		//go through the array again
-			//check if the current value is greater than the threshold
-				//if true set the value to 1 and add 1 to nwp
-				//else set it to 0
-			//multiply the value by the amount of values it is away from the center
-			//(could do this by multiplying the value by (i-numPixelsInARow/2) where i=0 will give -160 and i=320 will give 160
-		
+		//go through the array again and set white pixels
 		for (int i = 0; i < width; i++) {
 			if (pixRow[i] > threshold) {
-				pixRow[i] = (i-(width/2)); //1 x A is A, so you can skip the multiplication step
+				pixRow[i] = (i-160); //set this back to width/2 when it works
 				nwp++;
 			}
 			else {
@@ -116,55 +112,71 @@ int main() {
 			}
 		}
 		
+
+		if (dev) {
+			fprintf(file, "nwp = %d\n", nwp);
+		}
+
+		//the end is a solid white line perpendicular to the line that the robot was following, so now check to see
+		//if the number of white pixels is larger than a certain value
+			//if true, break;
+		/*if (nwp > width/2) {
+			break;
+		}*/
+		
 		//set the error value
-		//decare int j = 319;
-		//go through the array again (accidentally halved the time for this loop by doing this lol (thought about this a bit, maybe not. still stops overflow issues))
-			//add the furthest left pixel to the furthest right pixel
-			//add that value to error1
-			//decrease j by 1
 		int j = width - 1;
-		for (int i = 0; i < width/2; i++) {
-			error1 += pixRow[i] + pixRow[j];
+		for (int i = 0; i < (width/2); i++) {
+			error1 = error1 + (pixRow[i] + pixRow[j]);
 			j--;
 		}
+
+		if (dev) {
+			fprintf(file, "error1(1) = %d\n", error1);
+		}
+
 			
 		//normalise error (error/nwp) to make it so thiccccer lines dont fuck with my baby
 		error1 = error1/nwp;
+		if (dev) {
+			fprintf(file, "error1(2) = %d\n", error1);
+		}
+
 		
-		//make error a value between 0 and 255
-			//divide the error by the maximum possible error (figure this shit out later)
-			//multiply this by 255
-		error1 = (error1* 255)/MAX_ERROR;													//THIS IS WHY IT'S  ZERO
+		//make error a value between 0 and 255 (tbh it's not but I don't even know)
+		error1 = (error1*255)/(MAX_ERROR/nwp);
 		
 		//get the differential
-			//set diff_e to error1-error0
-			//set diff_t to ((float)(clock() - t0) / CLOCKS_PER_SEC );
-			//set diff to diff_e/diff_t
-		//set t0 to current time (t0 = clock() 	
-		//set error0 = error1
 		diff_e = error1 - error0;
-		diff_t = ((float)(clock() - t0)/ CLOCKS_PER_SEC);
-		diff = (float)diff_e/(float)diff_t;
+		diff_t = clock() - t0;
+		diff = (diff_e/diff_t) * 1000;
 		t0 = clock();
 		error0 = error1;
+
+		if(dev){
+			fprintf(file, "diff = %f\n", diff);
+			fprintf(file, "final error1 = %d\n", error1);
+		}
+		// set velocity change
+		dv = (int)(error1 * Kp + diff * Kd);
+
+		if(dev) {
+			fprintf(file, "dv = %d\n", dv);
+		}
 		
-		//set dv to error * Kp + diff * Kd
-		//set motor speeds
-			//vL = v_go + dv
-			//vR = v_go - dv
-			// set_motor(1, vL)
-			// set_motor(2, vR)
-		
-		dv = (int)(error1 * Kp + diff * Kd); //change this
+		//set left and right velocities
 		vL = vGo + dv;
 		vR = vGo - dv;
 		
 		set_motor(1, -vL);
 		set_motor(2, -vR);
+
 	}
 	
 	set_motor(1,0);
 	set_motor(2,0);
 	
+
+	fclose(file);
 	return 0;
 }
