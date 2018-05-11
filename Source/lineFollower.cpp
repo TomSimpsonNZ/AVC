@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <time.h>
 #include "E101.h"
+#include "lineFollower.h"
 
 //Ip address is 10.140.30.203
+//ssh -x pi@10.140.30.203
+//password is raspberry
 
 const int width = 320;
 const int MAX_ERROR = 12800;
@@ -42,12 +45,12 @@ void findLine(int array[width], int min, int max) {
 	}
 }
 
-int main() {
-	
-	init();
+void followLine() {
 
 	FILE* file;
 	file = fopen("log.txt", "w");
+	
+	bool inQuad = true;
 	
 	int error0 = 0;
 	int error1 = 0;
@@ -71,12 +74,14 @@ int main() {
 	clock_t t0 = clock(); // set this right before the loop starts so that there is actually a start time
 	
 	//note that negative means that the line is on the left and that the robot need to move right
-	while(true) {
+	while(inQuad) {
+		
 		//set error1 to 0
 		error1 = 0;
 		nwp = 0;
 		max = 0;
 		min = 255;
+		
 		//take a picture
 		take_picture();
 				
@@ -178,5 +183,4 @@ int main() {
 	
 
 	fclose(file);
-	return 0;
 }
