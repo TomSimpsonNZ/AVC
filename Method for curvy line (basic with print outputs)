@@ -50,105 +50,30 @@ unsigned char get_pixel( int row,int col, int color)
     return -2; //error
 }
 
-
-
-int ReadPPM(const char *filename)
-{
-  //char buff[16];
-  FILE *fp=fopen(filename, "rb");
-   if (!fp) {
-     printf("Unable to open file '%s'\n", filename);
-     return -1;
-  }
-  // read the header
-  char ch;
-  if ( fscanf(fp,"P%c\n",&ch) != 1 || ch != '6')
-  {
-	  printf("file is wrong format\n");
-	  return -2;
-  }
-  // skip comments
-  ch = getc(fp);
-  while(ch == '#')
-  {
-	  do {
-		  ch = getc(fp);
-	  } while (ch != '\n');
-	  ch = getc(fp);
-  }
- 
-   if (!isdigit(ch))  printf("Wrong header\n");
-   ungetc(ch,fp);  
-  //read width,height and max color value
-  int width, height, maxval;
-  int res = fscanf(fp,"%d%d%d\n",&width,&height,&maxval);
-  printf("Open file: width=%d height=%d\n",width,height);
-  
-  //Image *image = (Image *)calloc(1,sizeof(Image));
-  //if (!image) {
-  //   printf( "Unable to allocate memory\n");
- // }
-  int size = width*height*3;
- // image->data = malloc(size);
- // image->width = width;
- // image->height = height;
-  
-  int num =fread((void*) pixels_buf, 1,size,fp);
-  if (num!=size) {
-	printf("can not allocate image data memory: file=%s num=%d size=%d\n",
-	filename,num,size);
-	return -3;
-   }
-  
-  fclose(fp);
-  return 0;
-
-} 
-
+int e0 = 0;
+int t0 = 0;
 int main()
 {
-	// enter image file name
-	char file_name[7];
-	printf(" Enter image file name(with extension:\n");
-	scanf("%s",file_name);
-	printf(" You enter:%s\n",file_name);
-	// read image file
-	if (ReadPPM(file_name) != 0)
-	{
-		printf(" Can not open file\n");
-		return -1;
-	};
-	// save horizontal scan of the image into text file
-	FILE *scfile;
-	scfile = fopen("scan.txt","w");
-	int scan_row = 120;
-	for (int i = 0; i <320;i++)
-	{
-		int pix = get_pixel(scan_row,i,3);
-		printf("i=%d col=%d\n",i,pix);
-		fprintf(scfile,"%d %d\n",i,pix);
-		
-	}
-	fclose(scfile);
-
-     // 
-
-    int max = 0;
-    int min =255;
+    init();
+    int scan_row = 120;
+    while (true) {
+	int take_picture();
+        int max = 0;
+    	int min =255;
    	for (int i = 0; i <320;i++)
 	{
-		int pix = get_pixel(scan_row,i,3);
-        if ( pix > max) 
-        {
-			max = pix;
-		}
-		if (pix < min)
-		{
-			min =pix;
-		}
-    }
-    int diff = max-min;
-    if (diff<50)
+	     int pix = get_pixel(scan_row,i,3);
+             if ( pix > max) 
+             {
+	         max = pix;
+             }
+             if (pix < min)
+             {
+	         min = pix;
+	     }
+        }
+        int diff = max-min;
+        if (diff<50)
     {
         printf("Can't find line!\n");
         return 0;
@@ -158,13 +83,13 @@ int main()
     
     int whi[320];  // white pixels
     for (int i = 0; i <320;i++)
+    {
+	whi[i]= 100 ;
+ 	int pix = get_pixel(scan_row,i,3);
+	if ( pix > thr)
 	{
-		whi[i]= 100 ;
-		int pix = get_pixel(scan_row,i,3);
-		if ( pix > thr)
-		{
-			whi[i] = 200;
-		}
+	      whi[i] = 200;
+	}
     }
     
     for (int i = 0; i <320;i++)
@@ -172,7 +97,6 @@ int main()
         printf("%d ",whi[i]);
     }
     printf("\n");
-    
     int white;
     for (int i = 0; i<320; i++)
     {
@@ -194,23 +118,39 @@ int main()
         right = right + whi[i] * (i-159);
     }
     
+    unsigned char v_go = 0; //change
+    
     printf(" left=%d  right=%d whiteCount=%d\n", left, right, white);
     
     int ness = (left + right)/white;
     
     int error = 1000;
     
+    int de = ness - e0;
+    int t1 = t0 + 1;
+    int dt = t0 - t1;
+    int Kd = -0.05;
+    
+    double Kp = -0.005;
+    unsigned char dv = ness * Kp + de/dt * Kd;
+    double v_left = v_go + dv;
+    double v_right = v_go - dv;
+    set_motor(0, v_left);
+    set_motor(1, v_right);
+    
     if (ness>error){
-        printf(" turn right \n");
+        printf(" turn right: %d \n", v_right);
     }
     if (ness<-error){
-        printf(" turn left \n");
+        printf(" turn left: %d \n", v_left);
     }
-    if (ness<error||ness>-error){
+    if (ness<=error||ness=>-error) && ness!>error && ness!<-error){
         printf(" go straight \n");
     }
     
     printf("error=%d \n", ness);
+	e0 = ness;
+	t0 = t1;
 	
 	return 0;
 }
