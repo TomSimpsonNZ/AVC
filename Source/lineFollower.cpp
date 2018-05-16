@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <time.h>
 #include "E101.h"
-#include "lineFollower.h"
 
 //Ip address is 10.140.30.203
-//ssh -x pi@10.140.30.203
-//password is raspberry
 
 const int width = 320;
 const int MAX_ERROR = 12800;
@@ -14,10 +11,6 @@ const bool dev = false;
 void findLine(int array[width], int min, int max) {
 	
 	bool foundLine = false;
-	
-	/*if(fucked){
-		unfuck();
-	}*/
 	
 	while (!foundLine){
 		
@@ -45,24 +38,38 @@ void findLine(int array[width], int min, int max) {
 	}
 }
 
-void followLine() {
+int openGate(){
+	 int i = -1;
+	 while(i < 0){
+		i = connect_to_server("130.195.6.196", 1024);
+		printf("%d", i);
+	}
+	send_to_server("Please");
+	char password[24]; 
+	receive_from_server(password);
+	printf("%s", password);
+	send_to_server(password);
+}
+int main() {
+	
+	init();
+	sleep1(15, 0);
+	openGate();
 
 	FILE* file;
 	file = fopen("log.txt", "w");
 	
-	bool inQuad = true;
-	
 	int error0 = 0;
 	int error1 = 0;
 	int threshold;
-	int vGo = 50; //set this to the speed that you want the robot to travel at by default
+	int vGo = 40; //set this to the speed that you want the robot to travel at by default
 	int dv; //difference in speed between the two motors
 	int vL, vR;
 	int pixRow[320];
 	int nwp = 0;
 	//change these to adjust
 	float Kp = 0.5f; //How aggresively the robot responds to the line not being in the center of the camera
-	float Kd = 0.0f;
+	float Kd = 0.5f;
 	
 	int diff_e;
 	float diff_t;
@@ -74,14 +81,12 @@ void followLine() {
 	clock_t t0 = clock(); // set this right before the loop starts so that there is actually a start time
 	
 	//note that negative means that the line is on the left and that the robot need to move right
-	while(inQuad) {
-		
+	while(true) {
 		//set error1 to 0
 		error1 = 0;
 		nwp = 0;
 		max = 0;
 		min = 255;
-		
 		//take a picture
 		take_picture();
 				
@@ -149,12 +154,12 @@ void followLine() {
 
 		
 		//make error a value between 0 and 255 (tbh it's not but I don't even know)
-		error1 = (error1*255)/(MAX_ERROR/nwp);
+		error1 = (error1*150)/(MAX_ERROR/nwp);
 		
 		//get the differential
 		diff_e = error1 - error0;
 		diff_t = clock() - t0;
-		diff = (diff_e/diff_t) * 1000;
+		diff = (diff_e/diff_t) * 150;
 		t0 = clock();
 		error0 = error1;
 
@@ -183,4 +188,5 @@ void followLine() {
 	
 
 	fclose(file);
+	return 0;
 }
