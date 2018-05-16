@@ -1,0 +1,165 @@
+//
+// Code for the Straight Line Section
+// Skeleton - print outputs
+//
+// Created by Bryony Gatehouse on 09/05/18.
+// Copyright © 2018 Bryony Gatehouse. All rights reserved.
+//
+
+
+// if find a side route, move forwards till can't find line than turn
+// if the line continues straight then it won't turn cause it won't loose the line
+// if do lose line and have two options always turn left
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+#define CAMERA_WIDTH 320 //Control Resolution from Camera
+#define CAMERA_HEIGHT 240 //Control Resolution from Camera
+unsigned char pixels_buf[CAMERA_WIDTH*CAMERA_HEIGHT*4];
+
+// returns color component (color==0 -red,color==1-green,color==2-blue
+// color == 3 - luminocity
+// for pixel located at (row,column)
+unsigned char get_pixel( int row,int col, int color)
+{
+    // calculate address in 1D array of pixels
+    int address = CAMERA_WIDTH*row*3 + col*3;
+    if ((row < 0 ) || (row > CAMERA_HEIGHT) )
+    {
+        printf("row is out of range\n");
+        return -1;
+    }
+    if ( (col< 0) || (col > CAMERA_WIDTH))
+    {
+        printf("column is out of range\n");
+        return -1;
+    }
+    if (color==0)
+    {
+        return (pixels_buf[address]);
+    }
+    if (color==1)
+    {
+        return (pixels_buf[address + 1]);
+    }
+    if (color==2)
+    {
+        return (pixels_buf[address + 2]);
+    }
+    if (color==3)
+    {
+        unsigned char y = (pixels_buf[address] + pixels_buf[address+1] +pixels_buf[address+2])/3;
+        return y;
+    }
+    printf("Color encoding wrong: 0-red, 1-green,2-blue,3 - luminosity\n");
+    return -2; //error
+}
+
+int main()
+{
+    init();
+    int scan_row = 120;
+    while (true) {
+        int take_picture();
+        int max = 0;
+        int min = 225;
+        for (int i = 0; i < 320, i++){  
+             int pix = get_pixel(scan_row,i,3);
+             if (pix > max) {
+                  max = pix;
+             }
+             if (pix < min) {
+                  min = pix;
+             }
+        }
+        int diff = max-min;
+        if (diff < 50) {
+            printf("Can't find line!\n"); 
+            return 0;
+        }
+        int thr = (max-min)/2;
+        int whi[320];
+        for (int i = 0; i <320;i++)
+    {
+	whi[i]= 100 ;
+ 	int pix = get_pixel(scan_row,i,3);
+	if ( pix > thr)
+	{
+	      whi[i] = 200;
+	}
+    }
+    
+    for (int i = 0; i <320;i++)
+    {
+        printf("%d ",whi[i]);
+    }
+    printf("\n");
+    int white;
+    for (int i = 0; i<320; i++)
+    {
+        if (whi[i]==200)
+        {
+            white++;
+        }
+    }
+    
+    int left = 0;
+    for (int i = 0; i <160; i++)
+    {
+        left = left + whi[i] * (i-160);
+    }
+    
+    int right = 0;
+    for (int i = 160; i <320; i++)
+    {
+        right = right + whi[i] * (i-159);
+    }
+    
+    unsigned char v_go = 0; //change
+    
+    printf(" left=%d  right=%d whiteCount=%d\n", left, right, white);
+    
+    int ness = (left + right)/white;
+    
+    int error = 1000;
+    
+    int de = ness - e0;
+    int t1 = t0 + 1;
+    int dt = t0 - t1;
+    int Kd = -0.05;
+    
+    double Kp = -0.005;
+    unsigned char dv = ness * Kp + de/dt * Kd;
+    double v_left = v_go + dv;
+    double v_right = v_go - dv;
+    if (v_right>255){
+        v_right = 255;
+    }
+    if (v_left>255){
+        v_left = 255;
+    }
+    set_motor(0, v_left);
+    set_motor(1, v_right);
+    
+    if (ness>error){
+        printf(" turn right: %d \n", v_right);
+    }
+    if (ness<-error){
+        printf(" turn left: %d \n", v_left);
+    }
+    if (ness<=error||ness=>-error) && ness!>error && ness!<-error){
+        printf(" go straight \n");
+    }
+    
+    printf("error=%d \n", ness);
+	e0 = ness;
+	t0 = t1;
+	sleep1(0, 500);
+  
+	return 0;
+}
