@@ -50,6 +50,7 @@ int openGate(){
 	printf("%s", password);
 	send_to_server(password);
 }
+
 int main() {
 	
 	init();
@@ -126,13 +127,6 @@ int main() {
 		if (dev) {
 			fprintf(file, "nwp = %d\n", nwp);
 		}
-
-		//the end is a solid white line perpendicular to the line that the robot was following, so now check to see
-		//if the number of white pixels is larger than a certain value
-			//if true, break;
-		/*if (nwp > width/2) {
-			break;
-		}*/
 		
 		//set the error value
 		int j = width - 1;
