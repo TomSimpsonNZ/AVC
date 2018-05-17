@@ -11,20 +11,6 @@
 #include "E101.h"
 #include <sys/time.h>
 
-
-int main()
-{
-struct timeval t1;
-struct timeval t2; //structure with time gettimeofday(&t1,0); // mark time
-
-gettimeofday(&t2,0); // mark time now
-long elapsed = (t2.tv_sec - t1.tv_sec)*1000000+(t2.tv_usec-t1.tv_u);
-printf("elapsed time is %ld microseconds\n",elapsed);
-return 0;
-}
-
-
-
 double e0 = 0;
 
 int a = Read_Sensor(0);
@@ -34,7 +20,8 @@ int dist = a+b;
 int main(){
     init();
     struct timeval t1;
-    struct timeval t2; //structure with time gettimeofday(&t1,0); // mark time
+    struct timeval t2; //structure with time 
+    gettimeofday(&t1,0); // mark time
     int scan_row = 120;
     boolean first = true;
     while (true){
