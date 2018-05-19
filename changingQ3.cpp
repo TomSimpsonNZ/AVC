@@ -11,6 +11,9 @@
 		//until the line is a similar size, so you are looking at it straight, to before, give or take 20(?) pixels
 //if left side returns to normal
 		//go back to normal method
+//LINE 242 says that if the number of white pixels is smaller than the width/2
+//above same with LINE 106 LINE 107
+//for turning corner it should be right = -vGo and left = vGo
 
 float Kp = 0.45f;
 float Kd = 20.0f;
@@ -102,7 +105,7 @@ int TurnCornerOne(){
 		
       
 	if (nwp < width/2 && max - min < 50 && max < 100) {return 2;}//lostline
-	if (diff>50 && nwp <160){
+	if (diff>50 && nwp < 160){
 		return 1; //normal
 	}
 	return 0;//
