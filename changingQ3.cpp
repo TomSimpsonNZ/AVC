@@ -2,6 +2,16 @@
 #include <time.h>
 #include "E101.h"
  
+//WORKED OUT WHILE WORKING ON REPORT
+//if left side is completely white pixels,
+		//travel forwards
+		//until you loose the line or the left side returns to normal
+//if loose line after this method
+		//turn (left motor negative, right motor positive to turn the robot left)
+		//until the line is a similar size, so you are looking at it straight, to before, give or take 20(?) pixels
+//if left side returns to normal
+		//go back to normal method
+
 float Kp = 0.45f;
 float Kd = 20.0f;
 
