@@ -5,10 +5,9 @@
 
 void openGate() {
 	int i = -1;
-	char server[] = "130.195.6.196";//Server IP may change
 	
 	while(i < 0){
-		i = connect_to_server(server, 1024);
+		i = connect_to_server("130.195.6.196", 1024);//Server IP may change
 		printf("%d", i);
 	}
 	
