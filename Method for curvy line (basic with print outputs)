@@ -140,11 +140,11 @@ int main()
     
     if (ness>error){
         printf(" turn right: %d \n", v_right);
-    }
-    if (ness<-error){
+    }else if (ness<-error){
+    //if (ness<-error){
         printf(" turn left: %d \n", v_left);
-    }
-    if (ness<=error||ness=>-error) && ness!>error && ness!<-error){
+    }else{
+    //if (ness<=error||ness=>-error) && ness!>error && ness!<-error){
         printf(" go straight \n");
     }
     
