@@ -6,103 +6,131 @@
 //  Copyright © 2018 Bryony Gatehouse. All rights reserved.
 //
 
+//REMEMBER
+// motors on backwards
+
 #include <stdio.h>
 #include <time.h>
 #include "E101.h"
-#include <sys/time.h>
 
 double e0 = 0;
-
-int a = Read_Sensor(0);
-int b = Read_Sensor(1);
-int dist = a+b;
+int vGo = 40; //change
+int v_left;
+int v_right;
+clock_t t0;
+float Kp = 0.45f;
+float Kd = 20.0f;
+const int MAX_ERROR = 12800;
+int right, left, front;
+int error;
+int diff_e;
+float diff_t;
+int dv;
+int diffnc;
+int count=0;
 
 int main(){
     init();
-    struct timeval t1;
-    struct timeval t2; //structure with time 
-    gettimeofday(&t1,0); // mark time
     int scan_row = 120;
     boolean first = true;
+    int a = Read_Sensor(0);
+    int b = Read_Sensor(1);
+    int dist = a+b;
+    t0 = clock();
     while (true){
+        left = Read_Sensor(0);
+        right = Read_Sensor(1);
+        front = Read_Sensor(2);
+        error = (left-right);
+        e_width = left+right;
+        diff_e = error - e0;
+        diff_t = clock() - t0;
+        e0 = error;
         
-          int left = Read_Sensor(0);
-          int right = Read_Sensor(1);
-          int front = Read_Sensor(2);
-          int error = (left-right)/2;     
-          unsigned char v_go = 0; //change
-          double de = error - e0;
-          gettimeofday(&t2,0); // mark time now
-          long elapsed = (t2.tv_sec - t1.tv_sec)*1000000+(t2.tv_usec-t1.tv_u);
-          printf("elapsed time is %ld microseconds\n",elapsed);
-          double Kd = -0.05;
-          double Kp = -0.005;
-          unsigned char dv = error* Kp + de/dt * kd
-          double v_left = v_go + dv;
-          double v_right = v_go - dv;
-       
-          if(front>50){ // 50 as a guess
-               printf("Turn Around: %d", front);
-               if (error<0){
-                    while (Read_Sensor(0)+Read_Sensor(1) > dist+50 && Read_Sensor(2)>50){
-                        set_motor(1, -255); //left
-                        set_motor(2, 255);  //right
-                        //Turn Around Right: set right full, set left -full, until see front > 50
+        dv = error* Kp + ((diff_e/diff_t) * 150) * Kd
+        v_left = vGo + dv;
+        v_right = vGo - dv;
+        
+        if (first){
+            if(front<50){ // 50 as a guess
+                // if come to a dead end
+                if (e_width<dist-25 && e_width>dist+25){
+                    while (Read_Sensor(2)>50 && Read_Sensor(1)+Read_Sensor(0)>e_width){
+                        set_motor(1, -vGo);
+                        set_motor(2, vGo)
                     }
-               }
-               if (error>0){
-                   while (Read_Sensor(0)+Read_Sensor(1) > dist+50 && Read_Sensor(2)>50){
-                        set_motor(1, 255);
-                        set_motor(2, -255);
-                        //Turn Around Left: set left full, set right -full, until see front > 50
-                   }
-               }
-          }
-          else if (error*2 > dist+50 && left > right && first){
-               while (Read_Sensor(0)+Read_Sensor(1) > dist+50){
-                       set_motor(1, 127);
-                       set_motor(2, 100);
-               }
-               first = false;
-          }
-          
-          else { 
-               if(error<0){
-                      set_motor(2, v_right);
-                      set_motor(1, v_left);
-               }
-               if(error>0){
-                      set_motor(2, v_right);
-                      set_motor(1, v_left);
-               }
-               if(error==0){
-                      set_motor(1, 200);
-                      set_motor(2, 200);
-               }
-        
-          struct timeval t1;
-          struct timeval t2; //structure with time gettimeofday(&t1,0); // mark time
+                }
+                //if come to end with space on left
+                if (error>(dist/2)){
+                    while (Read_Sensor(2)>50 && Read_Sensor(1)+Read_Sensor(0)>dist+25){
+                        set_motor(1, -vGo/2);//left
+                        set_motor(2, -vGo);
+                    }
+                }
+            }
+            // if come to side path of left
+            else if (front>50 && error>(dist/2)){
+                while (Read_Sensor(0)+Read_Sensor(1) > dist+50){
+                    set_motor(1, -vGo/2);
+                    set_motor(2, -vGo);
+                }
+                first = false;
+            }
+            else {
+                set_motor(2, v_right);
+                set_motor(1, v_left);
+            }
+        }
+        else {
+            if(count==0){
+                if (front<50){
+                    while (Read_Sensor(2)>50 && Read_Sensor(1)+Read_Sensor(0)>dist+25){
+                        set_motor(1, -vGo);
+                        set_motor(2, -vGo/2);//right
+                    }
+                    count++;
+                }
+            }
+            if (count==1){
+                if (front<50){
+                    while(Read_Sensor(0)>dist/2){
+                        set_motor(1, -vGo/2);//left
+                        set_motor(2, -vGo);
+                    }
+                    count++;
+                }
+            }
+            if (count==2){
+                if(front<50){
+                    while (Read_Sensor(2)>50 && Read_Sensor(1)+Read_Sensor(0)>dist+25){
+                        set_motor(1, -vGo/2);//left
+                        set_motor(2, -vGo);
+                    }
+                }
+            }
+        }
+        t0 = clock();
+        }
+        return 0;
     }
-    return 0;
-}
     
-int Read_Sensor(int sensor){
-    int half_range;
-    int adc_readingmax;
-    int adc_readingmin;
-    int adc_reading;
-    int i;
-    for (i=0; i<10;i=i+1) {
-        adc_reading = read.analog(sensor);
-        if (adc_reading > adc_readingmax){
-            adc_readingmax = adc_reading; }
-        if (adc_reading < adc_readingmin){
-            adc_readingmin = adc_reading;}
-        sleep1(0,10000);
+    int Read_Sensor(int sensor){
+        int half_range;
+        int adc_readingmax;
+        int adc_readingmin;
+        int adc_reading;
+        int i;
+        for (i=0; i<10;i=i+1) {
+            adc_reading = read.analog(sensor);
+            if (adc_reading > adc_readingmax){
+                adc_readingmax = adc_reading; }
+            if (adc_reading < adc_readingmin){
+                adc_readingmin = adc_reading;}
+            sleep1(0,10000);
+        }
+        half_range = (adc_readingmax - adc_readingmin)/2;
+        //printf("Reading Max = %d\n", adc_readingmax);
+        //printf("Reading Min = %d\n", adc_readingmin);
+        sleep1 (0, 10000);
+        return half_range;
     }
-    half_range = (adc_readingmax - adc_readingmin)/2;
-    //printf("Reading Max = %d\n", adc_readingmax);
-    //printf("Reading Min = %d\n", adc_readingmin);
-    sleep1 (0, 10000);
-    return half_range;
-}
