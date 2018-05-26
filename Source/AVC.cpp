@@ -13,8 +13,8 @@ int pixRow[320];
 int leftRow[100];
 int rightRow[100];
 int nwp = 1;
-int max = 0;
-int min = 255;
+int	max = 0;
+int	min = 255;
 int quadrant = 1;
 
 int red;
@@ -24,7 +24,7 @@ int blue;
 float diff_t;
 float rateOfChange;
 
-clock_t t0;
+clock_t t0 = clock();
 FILE* file;
 
 float Kp = 0.5f;
@@ -35,11 +35,15 @@ float Kd = 0.5f;
 const int width = 320;
 const int lineHeight = 100;
 const int MAX_ERROR = 12800;
-const bool dev = false;
+const bool dev = true;
 
 void openGate();
 void lineFollower();
 void lineMaze();
+bool turnLeft();
+bool turnRight();
+void turnMaze(bool left);
+void turnMaze180();
 void wallMaze();
 void findLine(int array[width], int min, int max);
 void calculateThreshold();
@@ -56,12 +60,13 @@ int main() {
 
 	while(true){
 
-		nwp = 0;
+		nwp = 1;
 
 		switch(quadrant){
 
 			case 1:
 				openGate();
+				t0 = clock();
 				break;
 
 			case 2:
@@ -114,8 +119,6 @@ void openGate(){
  */
 void lineFollower(){
 
-	t0 = clock();
-
 	calculateThreshold();
 
 	if (max < 100) { // if max < 100 then white line is not being sensed by camera
@@ -131,7 +134,15 @@ void lineFollower(){
 	calculateDv();
 
 	// if it reaches white line break and continue to quadrant three code
-	if (leftRow() && rightRow()) {
+	bool left = turnLeft();
+	bool right = turnRight();
+	if (left && right) {
+		sleep1(1, 0);
+		Kp = 0.45;
+		Kd = 20.0f;
+		set_motor(1, 0);
+		set_motor(2, 0);
+		sleep1(0, 500000);
 		quadrant++;
 	}
 
@@ -153,17 +164,21 @@ void lineMaze(){
 	calculateDerivative();
 	calculateDv();
 
-	if (turnLeft()) {
+
+	bool left = turnLeft();
+	bool right = turnRight();
+
+	if (left) {
 		turnMaze(true);
 	}
-	else if (turnRight()) {
+	else if (right) {
 		turnMaze(false);
 	}
-	else if (turnLeft() && turnRight()) {
+	else if (left && right) {
 		turnMaze(true);
 	}
-	else if (!turnLeft() && !turnRight() && max < 100) { //if it's at the end of a line
-		turnMaze(true);
+	else if (!left && !right && max < 100) { //if it's at the end of a line
+		turnMaze180();
 	}
 
 	//check if it's at the end of the quadrant
@@ -226,39 +241,40 @@ bool turnRight() {
 /*
  * Turns the robot until the line is found
  */
-void turnMaze (bool left) {
-	set_motor(1, -vGo);
-	set_motor(2, -vGo);
-	sleep1(0, 500000);
-	set_motor(1, 0);
-	set_motor(2, 0);
+ void turnMaze (bool left) {
+ 	set_motor(1, -vGo);
+ 	set_motor(2, -vGo);
+ 	sleep1(0, 500000);
+ 	set_motor(1, 0);
+ 	set_motor(2, 0);
 
-	bool turn = true;
+ 	bool turn = true;
 
-	while (turn) {
-		calculateThreshold();
-		calculateProportionalError();
+ 	while (turn) {
+ 		calculateThreshold();
+ 		calculateProportionalError();
 
-		//if there isnt a line or the line isnt in the center, turn
-		if (error1 != 0 || max < 100) {
-			//turn
-			if (left) {
-				set_motor(1, -vGo);
-				set_motor(2, vGo);
-			}
-			else {
-				set_motor(1, vGo);
-				set_motor(2, -vGo);
-			}
-		}
-		else {
-			//stop turning
-			set_motor(1, 0);
-			set_motor(2, 0);
-			turn = false;
-		}
-	}
-}
+ 		//if there isnt a line or the line isnt in the center, turn
+ 		if (error1 != 0 || max < 100) {
+ 			//turn
+ 			if (left) {
+ 				set_motor(1, -vGo);
+ 				set_motor(2, vGo);
+ 			}
+ 			else {
+ 				set_motor(1, vGo);
+ 				set_motor(2, -vGo);
+ 			}
+ 		}
+ 		else {
+ 			//stop turning
+ 			set_motor(1, 0);
+ 			set_motor(2, 0);
+ 			turn = false;
+ 		}
+ 	}
+ }
+
 
  /*
   * Navigates the wall maze
@@ -400,9 +416,9 @@ void calculateProportionalError(){
 		fprintf(file, "error1(1) = %d\n", error1);
 	}
 
-	if (nwp = 0) {
+	/*if (nwp = 0) {
 		nwp = 1;
-	}
+	}*/
 
 	//normalise error
 	error1 = error1/nwp;
