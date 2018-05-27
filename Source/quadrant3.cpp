@@ -1,21 +1,27 @@
 #include <stdio.h>
 #include <time.h>
-//#include "E101.h"
+#include "E101.h"
 
 int diff_e;
 int error0 = 0;
 int error1 = 0;
-int threshold;
-int vGo = 40; //set this to the speed that you want the robot to travel at by default
+int threshold = 0;
+int vGo = 45; //set this to the speed that you want the robot to travel at by default
 int dv; //difference in speed between the two motors
 int vL, vR;
 int pixRow[320];
+int pixColLeft[240];
+int pixColRight[240];
 int nwp = 0;
-int	max = 0;
-int	min = 255;
+int max = 0;
+int min = 255;
 int quadrant = 1;
 int leftError = 0;
 int rightError = 0;
+int initialThreshold = 0;
+int leftNWP = 0;
+int rightNWP = 0;
+
 
 float diff_t;
 float rateOfChange;
@@ -37,12 +43,13 @@ FILE* file;
 //above same with LINE 106 LINE 107
 //for turning corner it should be right = -vGo and left = vGo
 
-float Kp = 0.45f;
-float Kd = 20.0f;
+float Kp = 0.40f;
+float Kd = 10.0f;
 
 //Ip address is 10.140.30.203
 
 const int width = 320;
+const int height = 240;
 const int MAX_ERROR = 12800;
 const bool dev = false;
 
@@ -51,7 +58,7 @@ void findLine(int array[width], int min, int max) {
 	while (!foundLine){
 		take_picture();
 		for (int i = 0; i < width; i++) {
-			array[i] = (int)get_pixel(120, i + 1, 3);
+			array[i] = (int)get_pixel(180, i + 1, 3);
 			if (array[i] > max){
 				max = array[i];
 			}else if (array[i] < min) {
@@ -86,7 +93,7 @@ void openGate(){
 }
 
 void calculateThreshold(){
-	take_picture();	
+//	take_picture();	
 	//make an array of all the pixels in a row of the image and set max and min
 	for (int i = 0; i < width; i++) { 
 		pixRow[i] = (int)get_pixel(120, i+1, 3);
@@ -99,8 +106,26 @@ void calculateThreshold(){
 	threshold = (max+min)/2; 	//set the threshold to equal half the difference between the max and the minumum
 }
 
+void calculateVerticalNWP(){
+	take_picture();
+	leftNWP = 0;
+	rightNWP = 0;
+	for(int i = 0; i < height;  i++){
+		pixColLeft[i] = (int)get_pixel(i + 1, 5, 3);
+		pixColRight[i] = (int)get_pixel(i + 1, 315, 3);
+	}
+	for (int i = 0; i < height; i++) {	//go through the array again and set white pixels
+		if (pixColLeft[i] > threshold) {
+			leftNWP++;
+		}
+		if (pixColRight[i] > threshold) {
+			 rightNWP++;
+		}
+	}
+}
 void calculateProportionalError(){
 	error1 = 0;
+	nwp = 0;
 	if (dev) {
 		fprintf(file, "max = %d\nmin = %d\nthreshold = %d\n", max, min, threshold);
 	}
@@ -127,7 +152,10 @@ void calculateProportionalError(){
 		fprintf(file, "error1(1) = %d\n", error1);
 	}
 	//normalise error
-	error1 = error1/nwp;
+	//max error =
+	if(nwp > 0){ 
+	error1 = (error1)/nwp;
+	}
 	if (dev) {
 		fprintf(file, "error1(2) = %d\n", error1);
 	}
@@ -155,138 +183,98 @@ int calculateLeftError(){
 	}
 	return leftError;
 }
-/*
-int calculateRightError(){
-	for(int i = width/2; i < width; i++){
-		if(pixRow[i] > threshold){
-			rightError += i;
-		}
-	}
-	return rightError;
-}*/
-/*
-int TurnCornerOne(){
-	int take_picture();
-        int max = 0;
-        int min = 225;
-        for (int i = 0; i < 320; i++){  
-             int pix = get_pixel(120,i,3);
-             if (pix > max) {
-                  max = pix;
-             }
-             if (pix < min) {
-                  min = pix;
-             }
-        }
-        int pixRow[320];
-        for (int i = 0; i < width; i++) {
-			pixRow[i] = (int)get_pixel(120, i+1, 3);
-			if (pixRow[i] > max){
-				max = pixRow[i];
-			}
-			else if (pixRow[i] < min) {
-				min = pixRow[i];
-			}
-		}
-        int diff = max-min;
-        int nwp = 0;
-        for (int i = 0; i < width; i++) {
-			if (pixRow[i] > diff/2) {
-				pixRow[i] = (i-160); //set this back to width/2 when it works
-				nwp++;
-			}
-			else {
-				pixRow[i] = 0;
-			}
-		}
-		
-      
-	if (nwp < width/2 && max - min < 50 && max < 100) {return 2;}//lostline
-	if (diff>50 && nwp < 160){
-		return 1; //normal
-	}
-	return 0;//
-}
 
-int turnCornerTwo(){
-	int take_picture();
-	int max = 0;
-        int min = 225;
-        for (int i = 0; i < 320; i++){  
-             int pix = get_pixel(120,i,3);
-             if (pix > max) {
-                  max = pix;
-             }
-             if (pix < min) {
-                  min = pix;
-             }
-        }
-        int diff = max-min;
-        int whi[320];
-		int white;
-	
-    	for (int i = 0; i<320; i++)
-    	{
-      		if (whi[i]==200)
-        	{
-           		white++;
-        	}
-    	}
-	if (diff>50){ return 1;}
-	return 0;
-}
-*/
 void lineFollower(){
 	t0 = clock();
-	calculateThreshold();
-		
+	take_picture();
+
 	if (max < 100) { // if max < 100 then white line is not being sensed by camera
 		findLine(pixRow, min, max);
 	}
-	
+	calculateThreshold();
 	calculateProportionalError();
 	calculateDerivative();
 	calculateDv();
 
 	// if it reaches white line break and continue to quadrant three code
-	if (nwp > width/2 && max - min < 50 && max > 120) {
+//	if (nwp > width/2 && max - min < 50 && max > 120) {
+	//	quadrant++;
+	//}
+	if(nwp > 240 || min > 200){
 		quadrant++;
-	}
-	set_motor(1, -vL);
-	set_motor(2, -vR);
-}
-
-void lineMaze(){
-	calculateThreshold();
-	calculateProportionalError();
-	calculateDerivative();
-	// will need calibration
-	if(error1 < -1000){
-		set_motor(1, -vGo);
-		set_motor(2, -vGo);
-	}else if(nwp > width/2 && max - min < 50 && max > 120){  //else if the robot reaches the white line a reads all white 
-		while(max < 120){ // while it can still sense white keep going forward
-			calculateThreshold();
-			set_motor(1, -vGo);
-			set_motor(2, -vGo);
-		}
-		set_motor(1, vGo);
-		set_motor(2, vGo);
+		set_motor(1, 0);
+		set_motor(2, 0);
 	}else{
-		calculateDv();
 		vL = vGo + dv;
 		vR = vGo - dv;
 		set_motor(1, -vL);
 		set_motor(2, -vR);
 	}
 }
+
+
+void lineMaze(){
+	t0 = clock();
+	take_picture();
+	calculateThreshold();
+	calculateProportionalError();
+	calculateDerivative();
+	calculateDv();
+	//if (max < 100) { // if max < 100 then white line is not being sensed by camera
+	//	findLine(pixRow, min, max);
+	//}
+	if(nwp < 40 || max < 100){
+		set_motor(1, 0);
+		set_motor(2, 0);
+		fprintf(file, "All Black: %d\n Left: %d Right: %d", nwp, leftNWP, rightNWP);
+		calculateVerticalNWP();
+		if(leftNWP > 1){
+			while(nwp < 50 && error1 < -2000){
+				t0 = clock();
+				take_picture();
+				calculateProportionalError();
+				calculateDerivative();
+				calculateDv();
+				fprintf(file, "Left NWP: %d\n", nwp);
+				set_motor(1, vGo - 10);
+				set_motor(2, -vGo); 
+			}
+		}else if(rightNWP > 20){
+			while(nwp < 50 && error1 < -2000){
+				t0 = clock();
+				take_picture();
+				calculateProportionalError();
+				calculateDerivative();
+				calculateDv();
+				fprintf(file, "Right NWP: %d\n", nwp);
+				set_motor(1, -vGo);
+				set_motor(2, vGo - 10);
+			}
+		}
+	}else{
+	vL = vGo + dv;
+	vR = vGo - dv;
+	set_motor(1, -vL);
+	set_motor(2, -vR);
+	}
+}
+
+
 void wallMaze(){
 	
 }
 int main() {
 	file = fopen("log.txt", "w");
 	init();
+	//int total = 0;
+	//for(int i = 0; i < 100; i++){
+	//calculateThreshold();
+	//total += threshold;
+	//}
+	//initialThreshold = total/100;
+	fprintf(file, "initial threshold: %d", initialThreshold);
 	while(true){
+	fprintf(file, "quadrant: %d\n", quadrant);
 		switch(quadrant){
 			case 1:
 				openGate();
@@ -295,6 +283,7 @@ int main() {
 				lineFollower();
 				break;
 			case 3:
+			//	threshold = initialThreshold;
 				lineMaze();
 				break;
 			case 4:
@@ -304,78 +293,5 @@ int main() {
 	}
 	fclose(file);
 }
-	
-//quadrant two breaks when it reaches the white line at the end
-	//change these to adjust
-	 //How aggresively the robot responds to the line not being in the center of the camera
-	
-	/*
 
-	
-	int max = 0;
-	int min = 255;
-	
-	 // set this right before the loop starts so that there is actually a start time
-	
-	//note that negative means that the line is on the left and that the robot need to move right
-	while(true) {
-		//set error1 to 0
-		
-		int whi[320];
-		int left = 0;
-	    	for (int i = 0; i <160; i++)
-    	{
-        	left = left + whi[i] * (i-160);
-    	}
-		
-		if (nwp < width/2 && max - min < 50 && max < 100){
-			while( TurnCornerOne() ==0){
-				set_motor(1, -vGo);
-				set_motor(2, -vGo);
-		}
-		if (TurnCornerOne()==2){
-			while(turnCornerTwo()==0){
-				set_motor(1, vGo);
-				set_motor(2, vGo);
-		}
-		}
-		}
-
-			
-		//normalise error (error/nwp) to make it so thiccccer lines dont fuck with my baby
-		
-
-		
-		//make error a value between 0 and 255 (tbh it's not but I don't even know)
-		error1 = (error1*150)/(MAX_ERROR/nwp);
-		
-		//get the differential
-		
-
-		if(dev){
-			fprintf(file, "diff = %f\n", diff);
-			fprintf(file, "final error1 = %d\n", error1);
-		}
-		// set velocity change
-		dv = (int)(error1 * Kp + diff * Kd);
-
-		if(dev) {
-			fprintf(file, "dv = %d\n", dv);
-		}
-		
-		//set left and right velocities
-		vL = vGo + dv;
-		vR = vGo - dv;
-		
-		set_motor(1, -vL);
-		set_motor(2, -vR);
-
-	}
-	
-	set_motor(1,0);
-	set_motor(2,0);
-	
-
-	fclose(file);
-	return 0;*/
 
