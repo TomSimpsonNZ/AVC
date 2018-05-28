@@ -58,7 +58,7 @@ void findLine(int array[width], int min, int max) {
 	while (!foundLine){
 		take_picture();
 		for (int i = 0; i < width; i++) {
-			array[i] = (int)get_pixel(180, i + 1, 3);
+			array[i] = (int)get_pixel(160, i + 1, 3);
 			if (array[i] > max){
 				max = array[i];
 			}else if (array[i] < min) {
@@ -91,12 +91,32 @@ void openGate(){
 	send_to_server(password);
 	quadrant++;
 }
-
+bool detectRedLine(){
+	int redTotal = 0;
+	int greenTotal = 0;
+	int blueTotal = 0;
+	
+	take_picture();
+	for(int i = 0; i < width; i++){
+		redTotal += get_pixel(160, i + 1, 0);
+		greenTotal += get_pixel(160, i + 1, 1);
+		blueTotal += get_pixel(160, i + 1, 2);
+	}
+	redTotal =redTotal/width;
+	greenTotal = greenTotal/width;
+	blueTotal = blueTotal/width;
+	if(redTotal > 180 && greenTotal < 60 && blueTotal < 60){
+		return true;
+	}
+	else{
+		return false;
+	}
+}
 void calculateThreshold(){
 //	take_picture();	
 	//make an array of all the pixels in a row of the image and set max and min
 	for (int i = 0; i < width; i++) { 
-		pixRow[i] = (int)get_pixel(120, i+1, 3);
+		pixRow[i] = (int)get_pixel(160, i+1, 3);
 		if (pixRow[i] > max){
 			max = pixRow[i];
 		}else if (pixRow[i] < min) {
@@ -256,6 +276,10 @@ void lineMaze(){
 				set_motor(2, vGo - 10);
 			}
 		}
+	}else if(detectRedLine()){
+		quadrant++;
+		set_motor(1, 0);
+		set_motor(2, 0);
 	}else{
 	vL = vGo + dv;
 	vR = vGo - dv;
