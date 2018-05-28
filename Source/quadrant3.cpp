@@ -224,25 +224,30 @@ void lineMaze(){
 	//	findLine(pixRow, min, max);
 	//}
 	if(nwp < 40 || max < 100){
+		nwp = 0;
+		error1 = 0;
 		set_motor(1, 0);
 		set_motor(2, 0);
-		fprintf(file, "All Black: %d\n Left: %d Right: %d", nwp, leftNWP, rightNWP);
 		calculateVerticalNWP();
-		if(leftNWP > 1){
-			while(nwp < 50 && error1 < -2000){
+		fprintf(file, "All Black: %d\n Left: %d Right: %d", nwp, leftNWP, rightNWP);
+		if(leftNWP > 10){
+			while(nwp < 50 /*&& error1 < -2000*/){
+				set_motor(1, vGo - 10);
+				set_motor(2, -vGo);
 				t0 = clock();
 				take_picture();
+				calculateThreshold();
 				calculateProportionalError();
 				calculateDerivative();
 				calculateDv();
 				fprintf(file, "Left NWP: %d\n", nwp);
-				set_motor(1, vGo - 10);
-				set_motor(2, -vGo); 
+ 
 			}
 		}else if(rightNWP > 20){
-			while(nwp < 50 && error1 < -2000){
+			while(nwp < 50 /*&& error1 > 2000*/){
 				t0 = clock();
 				take_picture();
+				calculateThreshold();
 				calculateProportionalError();
 				calculateDerivative();
 				calculateDv();
