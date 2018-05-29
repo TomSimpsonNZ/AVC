@@ -1,2 +1,0 @@
-void findLine();
-void followLine();
