@@ -66,7 +66,8 @@ void findLine(int array[width], int min, int max) {
 			foundLine = true;
 			set_motor(1, 0);
 			set_motor(2, 0);
-		}else {
+		}
+		else {
 			set_motor(1, vGo);
 			set_motor(2, vGo);
 		}
@@ -95,8 +96,6 @@ bool detectRedLine(){
 	int redTotal = 0;
 	int greenTotal = 0;
 	int blueTotal = 0;
-
-	take_picture();
 
 	redTotal = get_pixel(160, 120, 0);
 	greenTotal = get_pixel(160, 120, 1);
@@ -246,6 +245,12 @@ void lineMaze(){
 	calculateDerivative();
 	calculateDv();
 
+	if (detectRedLine()) {
+		quadrant++;
+		set_motor(1, 0);
+		set_motor(2, 0);
+	}
+
 	if(nwp < 40 || max < 100){
 
 		nwp = 0;
@@ -284,11 +289,6 @@ void lineMaze(){
 				set_motor(2, vGo - 10);
 			}
 		}
-	}
-	else if(detectRedLine()){
-		quadrant++;
-		set_motor(1, 0);
-		set_motor(2, 0);
 	}
 	else{
 	vL = vGo + dv;
@@ -360,6 +360,8 @@ void wallMaze(){
 	t0 = clock();
 	error1 = 0;
 
+	take_picture();
+	
 	calculateProportionalWall();
 	calculateDerivative();
 	calculateDv();
