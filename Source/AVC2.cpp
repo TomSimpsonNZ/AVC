@@ -15,15 +15,18 @@ int pixColRight[240];
 int nwp = 0;
 int max = 0;
 int min = 255;
+
 int quadrant = 1;
+
 int leftError = 0;
 int rightError = 0;
 int initialThreshold = 0;
 int leftNWP = 0;
 int rightNWP = 0;
-int wallDist = 200;
+int wallDist = 600;
 int adcReadingFront;
 int adcReadingRight;
+int count = 0;
 
 
 float diff_t;
@@ -31,9 +34,10 @@ float rateOfChange;
 
 clock_t t0;
 FILE* file;
+FILE* wallFile;
 
 float Kp = 0.40f;
-float Kd = 10.0f;
+float Kd = 8.0f;
 
 //Ip address is 10.140.30.203
 
@@ -41,6 +45,10 @@ const int width = 320;
 const int height = 240;
 const int MAX_ERROR = 12800;
 const bool dev = false;
+
+void calculateProportionalWall();
+void wallTurn(bool left);
+
 
 void findLine(int array[width], int min, int max) {
 	bool foundLine = false;
@@ -89,15 +97,12 @@ bool detectRedLine(){
 	int blueTotal = 0;
 
 	take_picture();
-	for(int i = 0; i < width; i++){
-		redTotal += get_pixel(160, i + 1, 0);
-		greenTotal += get_pixel(160, i + 1, 1);
-		blueTotal += get_pixel(160, i + 1, 2);
-	}
-	redTotal =redTotal/width;
-	greenTotal = greenTotal/width;
-	blueTotal = blueTotal/width;
-	if(redTotal > 180 && greenTotal < 60 && blueTotal < 60){
+
+	redTotal = get_pixel(160, 120, 0);
+	greenTotal = get_pixel(160, 120, 1);
+	blueTotal = get_pixel(160, 120, 2);
+
+	if(redTotal > 200 && blueTotal < 140){
 		return true;
 	}
 	else{
@@ -294,13 +299,39 @@ void lineMaze(){
 }
 
 
+void calculateProportionalWall() {
+
+	if (count == 0) {
+		set_motor(1, -vGo);
+		set_motor(2, -vGo);
+		sleep1(1, 0);
+		count++;
+	}
+
+	adcReadingRight = read_analog(5); //change this for which one the right sensor is plugged in to
+	adcReadingFront = read_analog(7);
+
+	if(adcReadingRight < 200) {
+		wallTurn(false);
+	}
+	else if (adcReadingFront > 400) {
+		set_motor(1, 0);
+		set_motor(2, 0);
+		wallTurn(true);
+	}
+
+	error1 = wallDist - adcReadingRight;
+	fprintf(wallFile, "error1:%d\n", error1);
+}
+
+
 void wallTurn(bool left) {
 	if (!left) {
 
-		while (adcReadingRight < 50) {
+		while (adcReadingRight < 200) {
 			set_motor(1, -vGo);
 			set_motor(2, -vGo * 0.25);
-			calculateProportionalWall();
+			adcReadingRight = read_analog(5);
 		}
 	}
 	else {
@@ -311,31 +342,14 @@ void wallTurn(bool left) {
 }
 
 
-void calculateProportionalWall() {
-	adcReadingRight = read_analog(0); //change this for which one the right sensor is plugged in to
-	adcReadingFront = read_analog(1);
-
-	if(adcReadingRight < 50) {
-		wallTurn(false);
-	}
-	else if (adcReadingFront > 250) {
-		set_motor(1, 0);
-		set_motor(2, 0);
-		wallTurn(true);
-	}
-
-	error1 = wallDist - adcReadingRight;
-}
-
-
 void stopAndWait() {
 	set_motor(1, 0);
 	set_motor(2, 0);
 
-	adcReadingFront = read_analog(1);
+	adcReadingFront = read_analog(7);
 
 	while (adcReadingFront > 100) {
-		adcReadingFront = read_analog(1);
+		adcReadingFront = read_analog(7);
 		sleep1(0, 250000);
 	}
 }
@@ -363,10 +377,12 @@ void wallMaze(){
 
 int main() {
 	file = fopen("log.txt", "w");
+	wallFile = fopen("wall-log.txt", "w");
+
 	init();
 
 	while(true){
-		
+
 	fprintf(file, "quadrant: %d\n", quadrant);
 		switch(quadrant){
 			case 1:
@@ -385,4 +401,5 @@ int main() {
 		}
 	}
 	fclose(file);
+	fclose(wallFile);
 }
