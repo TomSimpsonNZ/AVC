@@ -16,14 +16,14 @@ int nwp = 0;
 int max = 0;
 int min = 255;
 
-int quadrant = 1;
+int quadrant = 4;
 
 int leftError = 0;
 int rightError = 0;
 int initialThreshold = 0;
 int leftNWP = 0;
 int rightNWP = 0;
-int wallDist = 600;
+int wallDist = 400;
 int adcReadingFront;
 int adcReadingRight;
 int count = 0;
@@ -37,7 +37,7 @@ FILE* file;
 FILE* wallFile;
 
 float Kp = 0.40f;
-float Kd = 8.0f;
+float Kd = 15.0f;
 
 //Ip address is 10.140.30.203
 
@@ -249,6 +249,8 @@ void lineMaze(){
 		quadrant++;
 		set_motor(1, 0);
 		set_motor(2, 0);
+		Kp = 0.45;
+		Kd = 0;
 	}
 
 	if(nwp < 40 || max < 100){
@@ -263,7 +265,7 @@ void lineMaze(){
 		if(leftNWP > 10){
 
 			while(nwp < 50 /*&& error1 < -2000*/){
-				set_motor(1, vGo - 10);
+				set_motor(1, vGo);
 				set_motor(2, -vGo);
 				t0 = clock();
 				take_picture();
@@ -286,7 +288,7 @@ void lineMaze(){
 				calculateDv();
 				fprintf(file, "Right NWP: %d\n", nwp);
 				set_motor(1, -vGo);
-				set_motor(2, vGo - 10);
+				set_motor(2, vGo);
 			}
 		}
 	}
@@ -311,8 +313,8 @@ void calculateProportionalWall() {
 	adcReadingRight = read_analog(5); //change this for which one the right sensor is plugged in to
 	adcReadingFront = read_analog(7);
 
-	if(adcReadingRight < 200) {
 		wallTurn(false);
+		if(adcReadingRight < 400) {
 	}
 	else if (adcReadingFront > 400) {
 		set_motor(1, 0);
@@ -320,8 +322,8 @@ void calculateProportionalWall() {
 		wallTurn(true);
 	}
 
-	error1 = wallDist - adcReadingRight;
-	fprintf(wallFile, "error1:%d\n", error1);
+	error1 = adcReadingRight - wallDist;
+	printf("error1:%d\n", error1);
 }
 
 
@@ -361,7 +363,7 @@ void wallMaze(){
 	error1 = 0;
 
 	take_picture();
-	
+
 	calculateProportionalWall();
 	calculateDerivative();
 	calculateDv();
