@@ -4,7 +4,9 @@ Victoria University of Wellington Autonomous Vehicle Challenge
 Team Name: Tesla v2
 
 Team Members & Contact Info: Bryony (gatehouse3.14@gmail.com), Jakob (rogueninja580@gmail.com), Tom (tom.simpson.nz@gmail.com), Trent (kasanandra@gmail.com), Aidan (aidanator7000@gmail.com) 
+
 Communication tool: Discord
+
 Roles: 
   Bryony: Programming (writing basic code and developing it)
   Jakob: Hardware and Mechanical (Building components, putting the robot together)
@@ -24,7 +26,7 @@ Dated Milestones
   AVC Testing				28 May - 1 June
   AVC Final Report 			Mon 11 June
   
-  Objectives for Team Members
+Objectives for Team Members
   Week 1      -       Jakob, Aidan, Tom, Trent = building + designing robot
       Bryony, Trent = planning skeleton Code
   Week 2     -       Jakob = robot straight, possible repairs or upgrades
@@ -36,12 +38,12 @@ Dated Milestones
       Jakob = repairs and upgrades
 
 Diary of what’s happening (assignments, holidays, etc)
-  ALL = AVC Plan Mon 7, AVC Progress Mon 21, Queen’s Birthday 4 June, ENGR101 Test 5 June, AVC Testing 6 June, AVC Final 11 June
-  Bryony = COMP102 assignments Thurs, ENGR121 assignments Fri, CYBR171 test 9 May, Away from 3.30pm 11 May to late 13 May, COMP102 Test 14 May, ENGR121 test 25 May, 
-  Jakob = COMP102 assignments Thurs, 
-  Aidan = ENGR 141 assignments Mon, ENGR 121 assignments Fri, COMP112 Test 14 May, COMP 112 Assignments, 25 May ENGR 121 Test.
-  Tom = NIARC til 7pm Wed+Thur, Physics Test 4 May, MATH151 Assignments Fri, PHYS114 Assignments Fri, COMP102 test 14 May, 
-  Trent = 
+    ALL = AVC Plan Mon 7, AVC Progress Mon 21, Queen’s Birthday 4 June, ENGR101 Test 5 June, AVC Testing 6 June, AVC Final 11 June
+    Bryony = COMP102 assignments Thurs, ENGR121 assignments Fri, CYBR171 test 9 May, Away from 3.30pm 11 May to late 13 May, COMP102 Test 14 May, ENGR121 test 25 May, 
+    Jakob = COMP102 assignments Thurs, 
+    Aidan = ENGR 141 assignments Mon, ENGR 121 assignments Fri, COMP112 Test 14 May, COMP 112 Assignments, 25 May ENGR 121 Test.
+    Tom = NIARC til 7pm Wed+Thur, Physics Test 4 May, MATH151 Assignments Fri, PHYS114 Assignments Fri, COMP102 test 14 May, 
+    Trent = 
 
 Discord link:
   https://discord.gg/xngBux
