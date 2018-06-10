@@ -5,7 +5,11 @@ Team Name: Tesla v2
 
 #### Team Members & Contact Info: 
 
-Bryony (gatehouse3.14@gmail.com), Jakob (rogueninja580@gmail.com), Tom (tom.simpson.nz@gmail.com), Trent (kasanandra@gmail.com), Aidan (aidanator7000@gmail.com) 
+   Bryony (gatehouse3.14@gmail.com)  
+   Jakob (rogueninja580@gmail.com)  
+   Tom (tom.simpson.nz@gmail.com)  
+   Trent (kasanandra@gmail.com)  
+   Aidan (aidanator7000@gmail.com)   
 
 Communication tool: Discord
 
@@ -54,25 +58,25 @@ Communication tool: Discord
 ## Plan
 
 #### Dated Milestones:
-* AVC Project Plan			Mon 7 May
+* AVC Project Plan: Mon 7 May
   
-* Robot built (basic layout)   		Fri 11 May
+* Robot built (basic layout):Fri 11 May
   
-* Align motors   				Wed 16 May
+* Align motors: Wed 16 May
   
-* Make the robot open the gate  	Wed 16 May
+* Make the robot open the gate: Wed 16 May
   
-* Make the robot follow the line 	Wed 16 May
+* Make the robot follow the line: Wed 16 May
   
-* Make the robot navigate the maze  	Wed 23rd May
+* Make the robot navigate the maze: Wed 23rd May
   
-* AVC Progress Report			Mon 21 May
+* AVC Progress Report: Mon 21 May
   
-* Final debugging    			Tue 29 May
+* Final debugging: Tue 29 May
   
-* AVC Testing				28 May - 1 June
+* AVC Testing: 28 May - 1 June
   
-* AVC Final Report 			Mon 11 June
+* AVC Final Report: Mon 11 June
   
 #### Objectives for Team Members:
 * Week 1: 
@@ -93,17 +97,45 @@ Communication tool: Discord
   * Jakob = repairs and upgrades
 
 #### Diary of what’s happening (assignments, holidays, etc)
-* ALL = AVC Plan Mon 7, AVC Progress Mon 21, Queen’s Birthday 4 June, ENGR101 Test 5 June, AVC Testing 6 June, AVC Final 11 June
+* ALL: 
+  * AVC Plan Mon 7
+  * AVC Progress Mon 21
+  * Queen’s Birthday 4 June
+  * ENGR101 Test 5 June
+  * AVC Testing 6 June
+  * AVC Final 11 June
     
-* Bryony = COMP102 assignments Thurs, ENGR121 assignments Fri, CYBR171 test 9 May, Away from 3.30pm 11 May to late 13 May, COMP102 Test 14 May, ENGR121 test 25 May, 
+* Bryony:
+  * COMP102 assignments Thurs
+  * ENGR121 assignments Fri
+  * CYBR171 test 9 May
+  * Away from 3.30pm 11 May to late 13 May
+  * COMP102 Test 14 May
+  * ENGR121 test 25 May
     
-* Jakob = COMP102 assignments Thurs, 
+* Jakob:
+  * COMP102 assignments Thurs
     
-* Aidan = ENGR 141 assignments Mon, ENGR 121 assignments Fri, COMP112 Test 14 May, COMP 112 Assignments, 25 May ENGR 121 Test.
+* Aidan:
+  * ENGR141 assignments Mon
+  * ENGR121 assignments Fri
+  * COMP112 test 14 May
+  * COMP112 assignments Thurs
+  * ENGR121 test 25 May 
     
-* Tom = NIARC until 7pm Wed+Thurs, Physics Test 4 May, MATH151 Assignments Fri, PHYS114 Assignments Fri, COMP102 test 14 May, COMP102 assignments Thurs 
+* Tom:
+  * NIARC until 7pm Wed+Thurs
+  * Physics test 4 May
+  * MATH151 assignments Fri
+  * PHYS114 assignments Fri
+  * COMP102 test 14 May
+  * COMP102 assignments Thurs 
     
-* Trent = 
+* Trent:
+  * COMP112 assignments Thurs
+  * ENGR121 assignments Fri
+  * CYBR171 test 9 May
+  * COMP112 test 14 May
 
 #### Discord link:
 
