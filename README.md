@@ -3,7 +3,9 @@ Victoria University of Wellington Autonomous Vehicle Challenge
 
 Team Name: Tesla v2
 
-Team Members & Contact Info: Bryony (gatehouse3.14@gmail.com), Jakob (rogueninja580@gmail.com), Tom (tom.simpson.nz@gmail.com), Trent (kasanandra@gmail.com), Aidan (aidanator7000@gmail.com) 
+# Team Members & Contact Info: 
+
+Bryony (gatehouse3.14@gmail.com), Jakob (rogueninja580@gmail.com), Tom (tom.simpson.nz@gmail.com), Trent (kasanandra@gmail.com), Aidan (aidanator7000@gmail.com) 
 
 Communication tool: Discord
 
