@@ -313,8 +313,8 @@ void calculateProportionalWall() {
 	adcReadingRight = read_analog(5); //change this for which one the right sensor is plugged in to
 	adcReadingFront = read_analog(7);
 
+	if(adcReadingRight < 400) {
 		wallTurn(false);
-		if(adcReadingRight < 400) {
 	}
 	else if (adcReadingFront > 400) {
 		set_motor(1, 0);
